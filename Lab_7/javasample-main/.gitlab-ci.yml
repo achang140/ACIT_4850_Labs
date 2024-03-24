@@ -1,0 +1,38 @@
+# Group 35
+# Amanda Chang
+# Simon Freeman
+
+stages:
+  - build
+  - test
+  - deliver
+
+cache:
+  paths:
+    - target/
+    - .m2/repository
+
+Build:
+  stage: build
+  image: maven:latest
+  script:
+    - mvn package
+  tags:
+    - "Assignment2"
+
+Test:
+  stage: test
+  image: maven:latest
+  script:
+    - mvn test
+  tags:
+  - "Assignment2"
+
+Deliver:
+  stage: deliver
+  image: maven:latest
+  script: 
+    - chmod +x ./ci/scripts/deliver.sh
+    - ./ci/scripts/deliver.sh
+  tags:
+  - "Assignment2"
