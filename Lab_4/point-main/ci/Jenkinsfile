@@ -1,3 +1,4 @@
 @Library('ci_functions@main') _
 // python_build()
-python_build('point', 'pointapp')
+// python_build('point', 'pointapp')
+python_build('point', 'pointapp', 3000)
