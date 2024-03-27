@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+
+    parameters {
+        booleanParam(defaultValue: false, description: 'Deploy the App', name: 'DEPLOY') 
+    }
+    
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn -B -DskipTests clean package'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps { 
+                withCredentials([string(credentialsId: 'DockerHub', variable: 'TOKEN')]) {
+                    sh "docker login -u 'sfreemanpo98' -p '$TOKEN' docker.io"
+                    sh "docker build -t myapp:latest --tag sfreemanpo98/samplejava:myapp ."
+                    sh "docker push sfreemanpo98/samplejava:myapp"
+                }
+            }
+        }
+        
+        stage('Deliver') {
+            when {
+                expression { params.DEPLOY }
+            }
+            steps {
+                sh "docker run myapp:latest" 
+            }
+        }
+    }
+}
