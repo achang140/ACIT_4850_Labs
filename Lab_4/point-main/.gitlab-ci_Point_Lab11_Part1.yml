@@ -1,9 +1,3 @@
-# Lab 11 - Point 
-
-include:
-  project: 'Prototypes/ci_functions'
-  file: 'pipeline_template.yml'
-
 stages:
   - build
   - lint
@@ -63,13 +57,22 @@ Zip:
     - "lab"
 
 Package:
-  extends: .Package
-  variables:
-    DOCKER_IMAGE_NAME: "point"
-    DOCKER_IMAGE_TAG: "pointapp"
+  stage: package
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: always
+  script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - docker build -t $DOCKER_USERNAME/point:pointapp .
+    - docker push $DOCKER_USERNAME/point:pointapp
+  tags:
+    - "lab"
 
 Deliver:
-  extends: .Deliver
-  variables:
-    DOCKER_IMAGE_NAME: "point"
-    DOCKER_IMAGE_TAG: "pointapp"
+  stage: deliver
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_DEPLOYMENT != "false"'
+  script:
+    - docker run -d $DOCKER_USERNAME/point:pointapp
+  tags:
+    - "lab"
