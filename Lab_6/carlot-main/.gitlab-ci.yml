@@ -1,0 +1,75 @@
+# Lab 11 - Carlot 
+
+include:
+  project: 'Prototypes/ci_functions'
+  file: 'pipeline_template.yml'
+
+stages:
+  - build
+  - lint
+  - test
+  - zip
+  - package
+  - deliver
+
+Build:
+  stage: build
+  script:
+    - python3 -m venv ./venv
+    - source ./venv/bin/activate
+    - pip install -r requirements.txt
+  tags:
+    - "lab"
+
+Lint:
+  stage: lint
+  script:
+    - pylint --fail-under 5 *.py 
+  tags:
+    - "lab"
+
+Test_and_Coverage:
+  stage: test
+  script:
+    - |
+      if [ -d "test-reports" ]; then
+        rm -f test-reports/*.xml || true
+      fi
+      if [ -d "api-test-reports" ]; then
+        rm -f api-test-reports/*.xml || true
+      fi
+      for file in test*.py; do
+        coverage run --omit '*/dist-packages/*,*/site-packages/*' "$file"
+        coverage report
+        coverage xml -o coverage.xml
+      done
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - test-reports/*.xml
+        - api-test-reports/*.xml
+  tags: 
+    - "lab"
+
+Zip:
+  stage: zip
+  script:
+    - zip -j app.zip *.py
+  artifacts:
+    paths:
+      - "*.py"
+  tags:
+    - "lab"
+
+Package:
+  extends: .Package
+  variables:
+    DOCKER_IMAGE_NAME: "carlot"
+    DOCKER_IMAGE_TAG: "carlotapp"
+
+Deliver:
+  extends: .Deliver
+  variables:
+    DOCKER_IMAGE_NAME: "carlot"
+    DOCKER_IMAGE_TAG: "carlotapp"

@@ -1,0 +1,20 @@
+.Package:
+  stage: package
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: always
+  script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    - docker build -t $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .
+    - docker push $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+  tags:
+    - "lab"
+
+.Deliver:
+  stage: deliver
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $RUN_DEPLOYMENT != "false"'
+  script:
+    - docker run -d $DOCKER_USERNAME/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+  tags:
+    - "lab"
