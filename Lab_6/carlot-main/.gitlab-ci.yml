@@ -73,3 +73,14 @@ Deliver:
   variables:
     DOCKER_IMAGE_NAME: "carlot"
     DOCKER_IMAGE_TAG: "carlotapp"
+
+
+# Test_and_Coverage: This appears to be the name of a job or stage in the CI/CD pipeline.
+# stage: test: This indicates that this job or stage is part of the testing phase in the pipeline.
+# script: This is where the actual commands to be executed are listed.
+# if [ -d "test-reports" ]; then ... fi: This checks if a directory named "test-reports" exists. If it does, it removes all XML files in that directory. The || true part ensures that if the deletion fails for any reason, the script continues without throwing an error.
+# if [ -d "api-test-reports" ]; then ... fi: Similarly, this checks if a directory named "api-test-reports" exists. If it does, it removes all XML files in that directory.
+# for file in test*.py; do ... done: This loops through all files in the current directory that match the pattern "test*.py". For each file found, the following actions are performed:
+# coverage run --omit '*/dist-packages/*,*/site-packages/*' "$file": This runs the Python script specified by the current file ($file) with coverage measurement. The --omit flag specifies paths to omit from coverage analysis, typically third-party libraries to avoid skewing the results with their code.
+# coverage report: This generates a coverage report based on the execution of the Python script and prints it to the console.
+# coverage xml -o coverage.xml: This generates an XML report of the coverage data and writes it to a file named "coverage.xml". 
